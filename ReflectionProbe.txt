@@ -1,0 +1,19 @@
+/************************************************************
+Reflection Probe
+************************************************************/
+■my understanding
+	*	Reflection Probeが置かれたpositionから、6面方向に、texture mapを作成
+		注)
+			Reflection Probeで調整する"Size"は、このmapの範囲ではない。
+			本Reflectoin Probeで作成したtextureを与えるObjectを選択するための有効範囲設定。
+			
+	*	影響範囲(size)を調整
+		影響範囲内のObjectに対し、上記で作成したtexture mapを適用(実際には、shaderに送る)
+		
+	
+■Reflection Probeで鏡面反射する床を作る
+	http://nn-hokuson.hatenablog.com/entry/2016/10/17/202135
+	
+■UnityのReflectionProbeを使って鏡を作ってみる
+	https://gametukurikata.com/basic/mirror
+	
