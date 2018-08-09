@@ -4,6 +4,19 @@
 	
 元source
 	http://wiki.unity3d.com/index.php/MirrorReflection4
+	
+対応item
+	FlipCamera.cs と合わせて使用した時の挙動で対応が必要だった。
+	具体的には、
+		GL.invertCulling = !GlobalParam.b_FlipCamera;
+	の部分。
+	これは、対応ok.
+	
+制限事項
+	skyboxについて、
+	FlipCamera.cs + 本scriptで、反射された側(texture)におけるskyboxがflipされなかった。
+	main cameraのskyboxはflipされるので、skyboxのみ、左右反対になってしまう。
+	どうしてもこれが嫌な場合は、skybox変わりに周囲を天球で覆うか??
 ************************************************************/
 
 using UnityEngine;
@@ -81,13 +94,44 @@ public class MirrorReflection : MonoBehaviour
  
 		reflectionCamera.cullingMask = ~(1<<4) & m_ReflectLayers.value; // never render water layer
 		reflectionCamera.targetTexture = m_ReflectionTexture;
-		GL.SetRevertBackfacing (true);
+		
+		/********************
+		SetRevertBackfacing() is deprecated.
+			http://onoty3d.hatenablog.com/entry/2015/04/02/133941
+			
+			contents
+				// GL.SetRevertBackfacing (false);
+				GL.invertCulling = false;
+	
+		GL.invertCulling	
+			https://docs.unity3d.com/ScriptReference/GL-invertCulling.html
+		
+			contents
+				Select whether to invert the backface culling (true) or not (false).
+				This flag can "flip" the culling mode of all rendered objects. Major use case: rendering reflections for mirrors, water etc. 
+				Since virtual camera for rendering the reflection is mirrored, the culling order has to be inverted. You can see how the Water script in Effects standard package does that.
+				
+			FlipCamera.csでflipする場合.
+				main画面において、
+					GL.invertCulling = true;
+					
+				反射画面において、flipの反射なので
+					GL.invertCulling = false;
+					
+				otherwise : 反射面(texture)のcullingがおかしくなってしまった。
+		********************/
+		// GL.SetRevertBackfacing (true);
+		GL.invertCulling = !GlobalParam.b_FlipCamera;
+		
 		reflectionCamera.transform.position = newpos;
 		Vector3 euler = cam.transform.eulerAngles;
 		reflectionCamera.transform.eulerAngles = new Vector3(0, euler.y, euler.z);
 		reflectionCamera.Render();
 		reflectionCamera.transform.position = oldpos;
-		GL.SetRevertBackfacing (false);
+		
+		// GL.SetRevertBackfacing (false);
+		GL.invertCulling = false;
+		
 		Material[] materials = rend.sharedMaterials;
 		foreach( Material mat in materials ) {
 			if( mat.HasProperty("_ReflectionTex") )
